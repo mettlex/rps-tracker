@@ -2,11 +2,58 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import { createRef, useState } from "react";
 import Arrow from "../components/Arrow";
+import { getMultinomialDistribution } from "../utils/probability";
 
 const containerRef = createRef<HTMLDivElement>();
 
 const Home: NextPage = () => {
   const [boxes, setBoxes] = useState<Box[]>([]);
+  const [pVisible, setPVisible] = useState<boolean>(false);
+
+  const pNextB = (
+    getMultinomialDistribution({
+      n: boxes.length + 1,
+      xB: boxes.filter((box) => box.name.trim().toLowerCase() === "blue").length + 1,
+      xT: boxes.filter((box) => box.name.trim().toLowerCase() === "tie").length,
+      xR: boxes.filter((box) => box.name.trim().toLowerCase() === "red").length,
+      pB:
+        boxes.filter((box) => box.name.trim().toLowerCase() === "blue").length / (boxes.length + 1),
+      pT:
+        boxes.filter((box) => box.name.trim().toLowerCase() === "tie").length / (boxes.length + 1),
+      pR:
+        boxes.filter((box) => box.name.trim().toLowerCase() === "red").length / (boxes.length + 1),
+    }) * 100
+  ).toFixed(2);
+
+  const pNextT = (
+    getMultinomialDistribution({
+      n: boxes.length + 1,
+      xB: boxes.filter((box) => box.name.trim().toLowerCase() === "blue").length,
+      xT: boxes.filter((box) => box.name.trim().toLowerCase() === "tie").length + 1,
+      xR: boxes.filter((box) => box.name.trim().toLowerCase() === "red").length,
+      pB:
+        boxes.filter((box) => box.name.trim().toLowerCase() === "blue").length / (boxes.length + 1),
+      pT:
+        boxes.filter((box) => box.name.trim().toLowerCase() === "tie").length / (boxes.length + 1),
+      pR:
+        boxes.filter((box) => box.name.trim().toLowerCase() === "red").length / (boxes.length + 1),
+    }) * 100
+  ).toFixed(2);
+
+  const pNextR = (
+    getMultinomialDistribution({
+      n: boxes.length + 1,
+      xB: boxes.filter((box) => box.name.trim().toLowerCase() === "blue").length,
+      xT: boxes.filter((box) => box.name.trim().toLowerCase() === "tie").length,
+      xR: boxes.filter((box) => box.name.trim().toLowerCase() === "red").length + 1,
+      pB:
+        boxes.filter((box) => box.name.trim().toLowerCase() === "blue").length / (boxes.length + 1),
+      pT:
+        boxes.filter((box) => box.name.trim().toLowerCase() === "tie").length / (boxes.length + 1),
+      pR:
+        boxes.filter((box) => box.name.trim().toLowerCase() === "red").length / (boxes.length + 1),
+    }) * 100
+  ).toFixed(2);
 
   const handleBoxClick = (name: string = "Tie") => {
     setBoxes([
@@ -30,7 +77,14 @@ const Home: NextPage = () => {
       </Head>
 
       <main className="main">
-        <h4 className="title">RPS Tracker</h4>
+        <h4
+          className="title"
+          onClick={() => {
+            setPVisible(!pVisible);
+          }}
+        >
+          RPS Tracker
+        </h4>
 
         <footer className="footer">
           <div>
@@ -90,6 +144,7 @@ const Home: NextPage = () => {
               }}
             >
               Blue
+              {pVisible && <div className="p-next">{pNextB}</div>}
             </div>
             <div
               className="box tie"
@@ -98,6 +153,7 @@ const Home: NextPage = () => {
               }}
             >
               Tie
+              {pVisible && <div className="p-next">{pNextT}</div>}
             </div>
             <div
               className="box red"
@@ -106,6 +162,7 @@ const Home: NextPage = () => {
               }}
             >
               Red
+              {pVisible && <div className="p-next">{pNextR}</div>}
             </div>
           </div>
         </div>
