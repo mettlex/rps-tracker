@@ -112,10 +112,10 @@ const Predict: NextPage = () => {
   //#region Rule #3
   // Same wining sequence may not be more than 4 in length
 
-  if (count > 4 && last !== secondLast) {
-    const last2Removed = latestObservations.slice(0, -2);
+  let hightLightedIndexes: number[] = [];
 
-    console.log({ last2Removed });
+  if (count > 5 && last !== secondLast) {
+    const last2Removed = latestObservations.slice(0, -2);
 
     let sequence = [];
 
@@ -126,24 +126,19 @@ const Predict: NextPage = () => {
         break;
       }
 
-      if (last === last2Removed[i] && secondLast === last2Removed[i - 1]) {
+      if (
+        last === last2Removed[i] &&
+        secondLast === last2Removed[i - 1] &&
+        thirdLast === last2Removed[i - 2]
+      ) {
         notPredicted = last2Removed[i + 1];
+
+        sequence.push(last2Removed[i - 2]);
         sequence.push(last2Removed[i - 1]);
         sequence.push(last2Removed[i]);
         sequence.push(last2Removed[i + 1]);
-      }
-    }
 
-    if (sequence.length > 2) {
-      if (notPredicted === "blue") {
-        tPoints += basePoints * 2;
-        rPoints += basePoints * 2;
-      } else if (notPredicted === "tie") {
-        bPoints += basePoints * 2;
-        rPoints += basePoints * 2;
-      } else if (notPredicted === "red") {
-        tPoints += basePoints * 2;
-        bPoints += basePoints * 2;
+        hightLightedIndexes.push(boxes.length - latestObservations.length + i - 2);
       }
     }
 
@@ -174,6 +169,19 @@ const Predict: NextPage = () => {
     }
 
     if (sequence.length > 5) {
+      if (notPredicted === "blue") {
+        tPoints += basePoints * 2;
+        rPoints += basePoints * 2;
+      } else if (notPredicted === "tie") {
+        bPoints += basePoints * 2;
+        rPoints += basePoints * 2;
+      } else if (notPredicted === "red") {
+        tPoints += basePoints * 2;
+        bPoints += basePoints * 2;
+      }
+    }
+
+    if (sequence.length > 6) {
       if (notPredicted === "blue") {
         tPoints += basePoints * 2;
         rPoints += basePoints * 2;
@@ -323,7 +331,14 @@ const Predict: NextPage = () => {
 
             return (
               <div className="output" key={i}>
-                <div className={`box ${box.name.toLowerCase()}`}>
+                <div
+                  className={`box ${box.name.toLowerCase()}`}
+                  style={
+                    hightLightedIndexes.includes(i)
+                      ? { outline: "2px solid black", fontWeight: "bold" }
+                      : {}
+                  }
+                >
                   {box.name}
                   {count > 1 && i === boxes.length - 1 && <sub>({count})</sub>}
                 </div>
