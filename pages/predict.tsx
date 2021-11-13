@@ -114,7 +114,8 @@ const Predict: NextPage = () => {
 
   let hightLightedIndexes: number[] = [];
 
-  if (count > 5 && last !== secondLast) {
+  if (count > 6 && last !== secondLast) {
+    const forthLast = latestObservations[count - 4]?.trim().toLowerCase();
     const last2Removed = latestObservations.slice(0, -2);
 
     let sequence = [];
@@ -129,29 +130,18 @@ const Predict: NextPage = () => {
       if (
         last === last2Removed[i] &&
         secondLast === last2Removed[i - 1] &&
-        thirdLast === last2Removed[i - 2]
+        thirdLast === last2Removed[i - 2] &&
+        forthLast === last2Removed[i - 3]
       ) {
         notPredicted = last2Removed[i + 1];
 
+        sequence.push(last2Removed[i - 3]);
         sequence.push(last2Removed[i - 2]);
         sequence.push(last2Removed[i - 1]);
         sequence.push(last2Removed[i]);
         sequence.push(last2Removed[i + 1]);
 
-        hightLightedIndexes.push(boxes.length - latestObservations.length + i - 2);
-      }
-    }
-
-    if (sequence.length > 3) {
-      if (notPredicted === "blue") {
-        tPoints += basePoints * 2;
-        rPoints += basePoints * 2;
-      } else if (notPredicted === "tie") {
-        bPoints += basePoints * 2;
-        rPoints += basePoints * 2;
-      } else if (notPredicted === "red") {
-        tPoints += basePoints * 2;
-        bPoints += basePoints * 2;
+        hightLightedIndexes.push(boxes.length - latestObservations.length + i - 3);
       }
     }
 
@@ -178,59 +168,6 @@ const Predict: NextPage = () => {
       } else if (notPredicted === "red") {
         tPoints += basePoints * 2;
         bPoints += basePoints * 2;
-      }
-    }
-
-    if (sequence.length > 6) {
-      if (notPredicted === "blue") {
-        tPoints += basePoints * 2;
-        rPoints += basePoints * 2;
-      } else if (notPredicted === "tie") {
-        bPoints += basePoints * 2;
-        rPoints += basePoints * 2;
-      } else if (notPredicted === "red") {
-        tPoints += basePoints * 2;
-        bPoints += basePoints * 2;
-      }
-    }
-  }
-
-  //#endregion
-
-  //#region Rule #4
-  // Same things wining twice may not occur thrice
-
-  if (count > 6 && last && secondLast && thirdLast && last !== secondLast) {
-    const last1Removed = latestObservations.slice(0, -1);
-    const count = last1Removed.length;
-
-    let condition = true;
-
-    // now last 2 must be same 2 times
-
-    let last2Removed = last1Removed;
-    let last2RemovedCount = count;
-
-    for (let i = 0; i < 2; i++) {
-      if (last2Removed[last2RemovedCount - 1] === last2Removed[last2RemovedCount - 2]) {
-        last2Removed = last2Removed.slice(0, -2);
-        last2RemovedCount = last2Removed.length;
-      } else {
-        condition = false;
-        break;
-      }
-    }
-
-    if (condition === true) {
-      if (last === "blue") {
-        tPoints += basePoints;
-        rPoints += basePoints;
-      } else if (last === "tie") {
-        bPoints += basePoints;
-        rPoints += basePoints;
-      } else if (last === "red") {
-        tPoints += basePoints;
-        bPoints += basePoints;
       }
     }
   }
