@@ -131,7 +131,8 @@ const Predict: NextPage = () => {
         last === last2Removed[i] &&
         secondLast === last2Removed[i - 1] &&
         thirdLast === last2Removed[i - 2] &&
-        forthLast === last2Removed[i - 3]
+        forthLast === last2Removed[i - 3] &&
+        thirdLast === forthLast
       ) {
         notPredicted = last2Removed[i + 1];
 
@@ -169,6 +170,23 @@ const Predict: NextPage = () => {
         tPoints += basePoints * 2;
         bPoints += basePoints * 2;
       }
+    }
+  }
+
+  //#endregion
+
+  //#region
+  // Check double occurences
+
+  let starMarkedIndexes: number[] = [];
+
+  for (let i = 2; i < boxes.length; i++) {
+    if (!boxes[i + 1]?.name || !boxes[i]?.name || !boxes[i - 1]?.name || !boxes[i - 2]?.name) {
+      continue;
+    }
+
+    if (boxes[i].name !== boxes[i + 1].name && boxes[i - 1].name === boxes[i - 2].name) {
+      starMarkedIndexes.push(i + 1);
     }
   }
 
@@ -271,12 +289,14 @@ const Predict: NextPage = () => {
                 <div
                   className={`box ${box.name.toLowerCase()}`}
                   style={
-                    hightLightedIndexes.includes(i)
+                    hightLightedIndexes.includes(i) && pVisible
                       ? { outline: "2px solid black", fontWeight: "bold" }
                       : {}
                   }
                 >
+                  {starMarkedIndexes.includes(i) && "*"}
                   {box.name}
+                  {starMarkedIndexes.includes(i) && "*"}
                   {count > 1 && i === boxes.length - 1 && <sub>({count})</sub>}
                 </div>
                 {i !== boxes.length - 1 && <Arrow type={box.name.toLowerCase()}></Arrow>}

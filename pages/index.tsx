@@ -10,50 +10,65 @@ const Home: NextPage = () => {
   const [boxes, setBoxes] = useState<Box[]>([]);
   const [pVisible, setPVisible] = useState<boolean>(false);
 
-  const pNextB = (
-    getMultinomialDistribution({
-      n: boxes.length + 1,
-      xB: boxes.filter((box) => box.name.trim().toLowerCase() === "blue").length + 1,
-      xT: boxes.filter((box) => box.name.trim().toLowerCase() === "tie").length,
-      xR: boxes.filter((box) => box.name.trim().toLowerCase() === "red").length,
-      pB:
-        boxes.filter((box) => box.name.trim().toLowerCase() === "blue").length / (boxes.length + 1),
-      pT:
-        boxes.filter((box) => box.name.trim().toLowerCase() === "tie").length / (boxes.length + 1),
-      pR:
-        boxes.filter((box) => box.name.trim().toLowerCase() === "red").length / (boxes.length + 1),
-    }) * 100
-  ).toFixed(2);
+  let pNextB = "";
+  let pNextT = "";
+  let pNextR = "";
 
-  const pNextT = (
-    getMultinomialDistribution({
-      n: boxes.length + 1,
-      xB: boxes.filter((box) => box.name.trim().toLowerCase() === "blue").length,
-      xT: boxes.filter((box) => box.name.trim().toLowerCase() === "tie").length + 1,
-      xR: boxes.filter((box) => box.name.trim().toLowerCase() === "red").length,
-      pB:
-        boxes.filter((box) => box.name.trim().toLowerCase() === "blue").length / (boxes.length + 1),
-      pT:
-        boxes.filter((box) => box.name.trim().toLowerCase() === "tie").length / (boxes.length + 1),
-      pR:
-        boxes.filter((box) => box.name.trim().toLowerCase() === "red").length / (boxes.length + 1),
-    }) * 100
-  ).toFixed(2);
+  if (pVisible) {
+    pNextB = (
+      getMultinomialDistribution({
+        n: boxes.length + 1,
+        xB: boxes.filter((box) => box.name.trim().toLowerCase() === "blue").length + 1,
+        xT: boxes.filter((box) => box.name.trim().toLowerCase() === "tie").length,
+        xR: boxes.filter((box) => box.name.trim().toLowerCase() === "red").length,
+        pB:
+          boxes.filter((box) => box.name.trim().toLowerCase() === "blue").length /
+          (boxes.length + 1),
+        pT:
+          boxes.filter((box) => box.name.trim().toLowerCase() === "tie").length /
+          (boxes.length + 1),
+        pR:
+          boxes.filter((box) => box.name.trim().toLowerCase() === "red").length /
+          (boxes.length + 1),
+      }) * 100
+    ).toFixed(2);
 
-  const pNextR = (
-    getMultinomialDistribution({
-      n: boxes.length + 1,
-      xB: boxes.filter((box) => box.name.trim().toLowerCase() === "blue").length,
-      xT: boxes.filter((box) => box.name.trim().toLowerCase() === "tie").length,
-      xR: boxes.filter((box) => box.name.trim().toLowerCase() === "red").length + 1,
-      pB:
-        boxes.filter((box) => box.name.trim().toLowerCase() === "blue").length / (boxes.length + 1),
-      pT:
-        boxes.filter((box) => box.name.trim().toLowerCase() === "tie").length / (boxes.length + 1),
-      pR:
-        boxes.filter((box) => box.name.trim().toLowerCase() === "red").length / (boxes.length + 1),
-    }) * 100
-  ).toFixed(2);
+    pNextT = (
+      getMultinomialDistribution({
+        n: boxes.length + 1,
+        xB: boxes.filter((box) => box.name.trim().toLowerCase() === "blue").length,
+        xT: boxes.filter((box) => box.name.trim().toLowerCase() === "tie").length + 1,
+        xR: boxes.filter((box) => box.name.trim().toLowerCase() === "red").length,
+        pB:
+          boxes.filter((box) => box.name.trim().toLowerCase() === "blue").length /
+          (boxes.length + 1),
+        pT:
+          boxes.filter((box) => box.name.trim().toLowerCase() === "tie").length /
+          (boxes.length + 1),
+        pR:
+          boxes.filter((box) => box.name.trim().toLowerCase() === "red").length /
+          (boxes.length + 1),
+      }) * 100
+    ).toFixed(2);
+
+    pNextR = (
+      getMultinomialDistribution({
+        n: boxes.length + 1,
+        xB: boxes.filter((box) => box.name.trim().toLowerCase() === "blue").length,
+        xT: boxes.filter((box) => box.name.trim().toLowerCase() === "tie").length,
+        xR: boxes.filter((box) => box.name.trim().toLowerCase() === "red").length + 1,
+        pB:
+          boxes.filter((box) => box.name.trim().toLowerCase() === "blue").length /
+          (boxes.length + 1),
+        pT:
+          boxes.filter((box) => box.name.trim().toLowerCase() === "tie").length /
+          (boxes.length + 1),
+        pR:
+          boxes.filter((box) => box.name.trim().toLowerCase() === "red").length /
+          (boxes.length + 1),
+      }) * 100
+    ).toFixed(2);
+  }
 
   const handleBoxClick = (name: string = "Tie") => {
     setBoxes([
