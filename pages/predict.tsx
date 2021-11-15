@@ -185,8 +185,43 @@ const Predict: NextPage = () => {
       continue;
     }
 
-    if (boxes[i].name !== boxes[i + 1].name && boxes[i - 1].name === boxes[i - 2].name) {
+    if (
+      boxes[i].name !== boxes[i + 1].name &&
+      boxes[i - 1].name === boxes[i - 2].name &&
+      boxes[i].name !== boxes[i - 1].name
+    ) {
       starMarkedIndexes.push(i + 1);
+    }
+  }
+
+  //#endregion
+
+  //#region
+  // Check missing
+
+  const checkedCountForMissing = 6;
+
+  let missing = "";
+
+  let teams = ["blue", "tie", "red"];
+
+  const lastOnes = boxes.slice(-checkedCountForMissing).map((box) => box.name.trim().toLowerCase());
+
+  if (lastOnes.length >= checkedCountForMissing) {
+    for (let i = 0; i < checkedCountForMissing; i++) {
+      if (teams.length === 0) {
+        break;
+      }
+
+      const found = lastOnes.find((x) => teams.includes(x));
+
+      if (found) {
+        teams = teams.filter((x) => x !== found);
+      }
+    }
+
+    if (teams.length === 1) {
+      missing = teams[0];
     }
   }
 
@@ -311,7 +346,7 @@ const Predict: NextPage = () => {
                 handleBoxClick("Blue");
               }}
             >
-              Blue
+              Blue {missing === "blue" && <sub>(missing)</sub>}
               {pVisible && <div className="p-next">{bPoints}</div>}
             </div>
             <div
@@ -320,7 +355,7 @@ const Predict: NextPage = () => {
                 handleBoxClick("Tie");
               }}
             >
-              Tie
+              Tie {missing === "tie" && <sub>(missing)</sub>}
               {pVisible && <div className="p-next">{tPoints}</div>}
             </div>
             <div
@@ -329,7 +364,7 @@ const Predict: NextPage = () => {
                 handleBoxClick("Red");
               }}
             >
-              Red
+              Red {missing === "red" && <sub>(missing)</sub>}
               {pVisible && <div className="p-next">{rPoints}</div>}
             </div>
           </div>
