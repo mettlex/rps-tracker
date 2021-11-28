@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import { createRef, useState } from "react";
+import { createRef, useEffect, useMemo, useState } from "react";
 import Arrow from "../components/Arrow";
 
 const containerRef = createRef<HTMLDivElement>();
@@ -9,6 +9,9 @@ const Predict: NextPage = () => {
   const [boxes, setBoxes] = useState<Box[]>([]);
   const [pVisible, setPVisible] = useState<boolean>(false);
   const [consideredObservations, setConsideredObservations] = useState<number>(15);
+  const [hightLightedIndex, setHightLightedIndex] = useState<number | null>(null);
+  const [prevHightLightedIndex, setPrevHightLightedIndex] = useState<number | null>(null);
+  const [notPredicted, setNotPredicted] = useState<string>("");
 
   let bPoints = 0;
   let tPoints = 0;
@@ -112,66 +115,54 @@ const Predict: NextPage = () => {
   //#region Rule #3
   // Same wining sequence may not be more than 4 in length
 
-  let hightLightedIndexes: number[] = [];
+  const hightLightedIndexes: number[] = useMemo(
+    () => (hightLightedIndex ? [hightLightedIndex] : []),
+    [hightLightedIndex],
+  );
 
-  if (count > 6 && last !== secondLast) {
-    const forthLast = latestObservations[count - 4]?.trim().toLowerCase();
-    const last2Removed = latestObservations.slice(0, -2);
+  useEffect(() => {
+    if (count > 6) {
+      const last3Removed = latestObservations.slice(0, -3);
 
-    let sequence = [];
+      const sequence = latestObservations.slice(-3);
 
-    let notPredicted = "";
+      const matchedIndex = last3Removed.findIndex((_, i) => {
+        return (
+          last3Removed[i] === sequence[0] &&
+          last3Removed[i + 1] === sequence[1] &&
+          last3Removed[i + 2] === sequence[2]
+        );
+      });
 
-    for (let i = 1; i < last2Removed.length; i++) {
-      if (!last2Removed[i + 1]) {
-        break;
+      const matched = matchedIndex !== -1 && last3Removed[matchedIndex];
+
+      if (sequence[0] === sequence[1] && sequence[1] !== sequence[2] && matched) {
+        const index = boxes.length - latestObservations.length + matchedIndex + 3;
+
+        if (prevHightLightedIndex !== hightLightedIndex || !hightLightedIndex) {
+          setHightLightedIndex(index);
+          setNotPredicted(boxes[index]?.name.toLowerCase());
+        }
       }
 
-      if (
-        last === last2Removed[i] &&
-        secondLast === last2Removed[i - 1] &&
-        thirdLast === last2Removed[i - 2] &&
-        forthLast === last2Removed[i - 3] &&
-        thirdLast === forthLast
-      ) {
-        notPredicted = last2Removed[i + 1];
-
-        sequence.push(last2Removed[i - 3]);
-        sequence.push(last2Removed[i - 2]);
-        sequence.push(last2Removed[i - 1]);
-        sequence.push(last2Removed[i]);
-        sequence.push(last2Removed[i + 1]);
-
-        hightLightedIndexes.push(boxes.length - latestObservations.length + i - 3);
-      }
-    }
-
-    if (sequence.length > 4) {
-      if (notPredicted === "blue") {
-        tPoints += basePoints * 2;
-        rPoints += basePoints * 2;
-      } else if (notPredicted === "tie") {
-        bPoints += basePoints * 2;
-        rPoints += basePoints * 2;
-      } else if (notPredicted === "red") {
-        tPoints += basePoints * 2;
-        bPoints += basePoints * 2;
+      if (!matched) {
+        setPrevHightLightedIndex(null);
+        setHightLightedIndex(null);
+        setNotPredicted("");
       }
     }
-
-    if (sequence.length > 5) {
-      if (notPredicted === "blue") {
-        tPoints += basePoints * 2;
-        rPoints += basePoints * 2;
-      } else if (notPredicted === "tie") {
-        bPoints += basePoints * 2;
-        rPoints += basePoints * 2;
-      } else if (notPredicted === "red") {
-        tPoints += basePoints * 2;
-        bPoints += basePoints * 2;
-      }
-    }
-  }
+  }, [
+    boxes,
+    boxes.length,
+    count,
+    hightLightedIndex,
+    hightLightedIndexes,
+    last,
+    latestObservations,
+    prevHightLightedIndex,
+    secondLast,
+    notPredicted,
+  ]);
 
   //#endregion
 
@@ -235,6 +226,12 @@ const Predict: NextPage = () => {
       },
     ]);
 
+    if (hightLightedIndex) {
+      setPrevHightLightedIndex(hightLightedIndex);
+      setHightLightedIndex(hightLightedIndex + 1);
+      setNotPredicted(boxes[hightLightedIndex + 1].name.toLowerCase());
+    }
+
     const tid = setTimeout(() => {
       containerRef.current?.scrollTo(0, containerRef.current.scrollHeight);
       clearTimeout(tid);
@@ -288,6 +285,13 @@ const Predict: NextPage = () => {
                 event.preventDefault();
                 boxes.pop();
                 setBoxes([...boxes]);
+
+                if (hightLightedIndex) {
+                  setPrevHightLightedIndex(hightLightedIndex - 2);
+                  setHightLightedIndex(hightLightedIndex - 1);
+
+                  setNotPredicted(boxes[hightLightedIndex - 1]?.name.toLowerCase());
+                }
               }}
             >
               Undo&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -300,6 +304,9 @@ const Predict: NextPage = () => {
               onClick={(event) => {
                 event.preventDefault();
                 setBoxes([]);
+
+                setPrevHightLightedIndex(null);
+                setHightLightedIndex(null);
               }}
             >
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Clear
